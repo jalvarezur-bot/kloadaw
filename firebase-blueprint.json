@@ -1,0 +1,135 @@
+{
+  "entities": {
+    "IslandProfile": {
+      "title": "Island Profile",
+      "description": "User profile with island data, birthday, EXP points, and avatar configuration",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "playerName": { "type": "string", "maxLength": 64 },
+        "islandName": { "type": "string", "maxLength": 64 },
+        "nativeFruit": { "type": "string", "maxLength": 32 },
+        "hemisphere": { "type": "string", "maxLength": 16 },
+        "birthdayDay": { "type": "number" },
+        "birthdayMonth": { "type": "number" },
+        "experience": { "type": "number" },
+        "activeIconId": { "type": "string", "maxLength": 64 },
+        "unlockedIconIds": { "type": "array" },
+        "totakekeUnlocked": { "type": "boolean" },
+        "islandRating": { "type": "number" },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["userId", "playerName", "islandName", "experience", "activeIconId"]
+    },
+    "JournalEntry": {
+      "title": "Journal Entry",
+      "description": "Personal daily journal entry with island events, weather, turnip prices, and photos",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 32 },
+        "title": { "type": "string", "maxLength": 128 },
+        "weather": { "type": "string", "maxLength": 32 },
+        "rating": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 2048 },
+        "specialVisitor": { "type": "string", "maxLength": 64 },
+        "turnipBuy": { "type": "number" },
+        "turnipSell": { "type": "number" },
+        "photoUrl": { "type": "string", "maxLength": 500000 },
+        "photoCaption": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["userId", "date", "title", "notes"]
+    },
+    "IslandVillager": {
+      "title": "Island Villager",
+      "description": "Villager living on user island with friendship tracking and daily habits",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "villagerKey": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 64 },
+        "species": { "type": "string", "maxLength": 32 },
+        "personality": { "type": "string", "maxLength": 32 },
+        "catchphrase": { "type": "string", "maxLength": 64 },
+        "birthday": { "type": "string", "maxLength": 32 },
+        "avatarUrl": { "type": "string", "maxLength": 1024 },
+        "friendshipLevel": { "type": "number" },
+        "talkedToday": { "type": "boolean" },
+        "giftGivenToday": { "type": "boolean" },
+        "isFavorite": { "type": "boolean" }
+      },
+      "required": ["userId", "name", "species", "personality", "friendshipLevel"]
+    },
+    "StoryMilestone": {
+      "title": "Story Milestone",
+      "description": "Chapter in the island development story towards unlocking Totakeke",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "stepNumber": { "type": "number" },
+        "completed": { "type": "boolean" },
+        "completedTasks": { "type": "array" },
+        "notes": { "type": "string", "maxLength": 1024 },
+        "completedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["userId", "stepNumber", "completed"]
+    },
+    "IslandGoal": {
+      "title": "Island Goal or Calendar Event",
+      "description": "Personal daily task or special calendar event with EXP reward",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 32 },
+        "type": { "type": "string", "maxLength": 32 },
+        "completed": { "type": "boolean" },
+        "xpReward": { "type": "number" }
+      },
+      "required": ["userId", "title", "date", "completed"]
+    },
+    "DailyMission": {
+      "title": "Daily Mini-Mission",
+      "description": "Nook Miles-style daily mission granting EXP to buy avatars",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "missionKey": { "type": "string", "maxLength": 64 },
+        "dayKey": { "type": "string", "maxLength": 32 },
+        "title": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 256 },
+        "xpReward": { "type": "number" },
+        "completed": { "type": "boolean" },
+        "claimed": { "type": "boolean" }
+      },
+      "required": ["userId", "missionKey", "dayKey", "title", "xpReward", "completed"]
+    }
+  },
+  "firestore": {
+    "/island_profiles/{profileId}": {
+      "schema": "IslandProfile",
+      "description": "User island settings, birthday, and progression summary"
+    },
+    "/journal_entries/{entryId}": {
+      "schema": "JournalEntry",
+      "description": "Personal daily journal records and photos"
+    },
+    "/villagers/{villagerId}": {
+      "schema": "IslandVillager",
+      "description": "Villagers residing on the player's island"
+    },
+    "/story_milestones/{milestoneId}": {
+      "schema": "StoryMilestone",
+      "description": "Campaign progress records to unlock Totakeke"
+    },
+    "/island_goals/{goalId}": {
+      "schema": "IslandGoal",
+      "description": "Daily calendar goals and events"
+    },
+    "/daily_missions/{missionId}": {
+      "schema": "DailyMission",
+      "description": "Daily missions for earning EXP"
+    }
+  }
+}

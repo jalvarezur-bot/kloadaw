@@ -1,0 +1,6 @@
+{
+  "name": "NookPedia - Diario de Isla ACNH",
+  "description": "Diario personal, registro de vecinos, calendario de eventos y metas, ruta de historia para desbloquear a Totakeke, misiones diarias con EXP y tienda de avatares con sincronización automática en todos tus dispositivos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

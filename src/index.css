@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --ac-mint: #e8f5e9;
+    --ac-mint-dark: #388e3c;
+    --ac-cream: #fbf8eb;
+    --ac-leaf: #5cb85c;
+    --ac-sky: #e1f5fe;
+    --ac-wood: #8d6e63;
+    --ac-wood-light: #d7ccc8;
+    --ac-coral: #ff8a80;
+    --ac-butter: #fff9c4;
+    --ac-lavender: #ede7f6;
+    --ac-brown-text: #4e342e;
+  }
+
+  body {
+    background-color: #fbf8eb;
+    color: #4e342e;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-image: 
+      radial-gradient(#e0d7be 1px, transparent 1px),
+      radial-gradient(#e0d7be 1px, #fbf8eb 1px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    min-height: 100vh;
+  }
+}
+
+.font-ac {
+  font-family: 'DynaPuff', 'Plus Jakarta Sans', cursive, sans-serif;
+}
+
+/* Custom scrollbar matching Animal Crossing aesthetic */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1ebd6;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c7be9e;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a99e7b;
+}

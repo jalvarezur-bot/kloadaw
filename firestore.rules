@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // --- Validation Helpers ---
+
+    function isValidProfile(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.playerName is string && data.playerName.size() <= 64
+        && data.islandName is string && data.islandName.size() <= 64
+        && data.experience is number && data.experience >= 0
+        && data.activeIconId is string && data.activeIconId.size() <= 64
+        && (!('unlockedIconIds' in data) || (data.unlockedIconIds is list && data.unlockedIconIds.size() <= 200))
+        && (!('birthdayDay' in data) || (data.birthdayDay is number))
+        && (!('birthdayMonth' in data) || (data.birthdayMonth is number))
+        && (!('totakekeUnlocked' in data) || (data.totakekeUnlocked is bool))
+        && (!('islandRating' in data) || (data.islandRating is number));
+    }
+
+    function isValidJournalEntry(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.date is string && data.date.size() <= 32
+        && data.title is string && data.title.size() <= 128
+        && data.notes is string && data.notes.size() <= 4000
+        && (!('weather' in data) || (data.weather is string && data.weather.size() <= 32))
+        && (!('rating' in data) || (data.rating is number))
+        && (!('specialVisitor' in data) || (data.specialVisitor is string && data.specialVisitor.size() <= 64))
+        && (!('turnipBuy' in data) || (data.turnipBuy is number))
+        && (!('turnipSell' in data) || (data.turnipSell is number))
+        && (!('photoUrl' in data) || (data.photoUrl is string && data.photoUrl.size() <= 500000))
+        && (!('photoCaption' in data) || (data.photoCaption is string && data.photoCaption.size() <= 128));
+    }
+
+    function isValidVillager(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.name is string && data.name.size() <= 64
+        && data.species is string && data.species.size() <= 32
+        && data.personality is string && data.personality.size() <= 32
+        && data.friendshipLevel is number && data.friendshipLevel >= 0 && data.friendshipLevel <= 6
+        && (!('catchphrase' in data) || (data.catchphrase is string && data.catchphrase.size() <= 64))
+        && (!('birthday' in data) || (data.birthday is string && data.birthday.size() <= 32))
+        && (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 1024))
+        && (!('talkedToday' in data) || (data.talkedToday is bool))
+        && (!('giftGivenToday' in data) || (data.giftGivenToday is bool))
+        && (!('isFavorite' in data) || (data.isFavorite is bool));
+    }
+
+    function isValidMilestone(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.stepNumber is number && data.stepNumber >= 1 && data.stepNumber <= 20
+        && data.completed is bool
+        && (!('completedTasks' in data) || (data.completedTasks is list && data.completedTasks.size() <= 50))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1024));
+    }
+
+    function isValidGoal(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.title is string && data.title.size() <= 128
+        && data.date is string && data.date.size() <= 32
+        && data.completed is bool
+        && (!('type' in data) || (data.type is string && data.type.size() <= 32))
+        && (!('xpReward' in data) || (data.xpReward is number));
+    }
+
+    function isValidDailyMission(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.missionKey is string && data.missionKey.size() <= 64
+        && data.dayKey is string && data.dayKey.size() <= 32
+        && data.title is string && data.title.size() <= 128
+        && data.xpReward is number && data.xpReward >= 0
+        && data.completed is bool
+        && (!('claimed' in data) || (data.claimed is bool))
+        && (!('description' in data) || (data.description is string && data.description.size() <= 256));
+    }
+
+    // --- Collections ---
+
+    match /island_profiles/{profileId} {
+      allow get: if isValidId(profileId) && isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidId(profileId) && isSignedIn() && incoming().userId == request.auth.uid && isValidProfile(incoming());
+      allow update: if isValidId(profileId) && isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidProfile(incoming());
+      allow delete: if isValidId(profileId) && isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /journal_entries/{entryId} {
+      allow get: if isValidId(entryId) && isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidId(entryId) && isSignedIn() && incoming().userId == request.auth.uid && isValidJournalEntry(incoming());
+      allow update: if isValidId(entryId) && isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidJournalEntry(incoming());
+      allow delete: if isValidId(entryId) && isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /villagers/{villagerId} {
+      allow get: if isValidId(villagerId) && isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidId(villagerId) && isSignedIn() && incoming().userId == request.auth.uid && isValidVillager(incoming());
+      allow update: if isValidId(villagerId) && isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidVillager(incoming());
+      allow delete: if isValidId(villagerId) && isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /story_milestones/{milestoneId} {
+      allow get: if isValidId(milestoneId) && isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidId(milestoneId) && isSignedIn() && incoming().userId == request.auth.uid && isValidMilestone(incoming());
+      allow update: if isValidId(milestoneId) && isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidMilestone(incoming());
+      allow delete: if isValidId(milestoneId) && isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /island_goals/{goalId} {
+      allow get: if isValidId(goalId) && isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidId(goalId) && isSignedIn() && incoming().userId == request.auth.uid && isValidGoal(incoming());
+      allow update: if isValidId(goalId) && isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidGoal(incoming());
+      allow delete: if isValidId(goalId) && isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /daily_missions/{missionId} {
+      allow get: if isValidId(missionId) && isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidId(missionId) && isSignedIn() && incoming().userId == request.auth.uid && isValidDailyMission(incoming());
+      allow update: if isValidId(missionId) && isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidDailyMission(incoming());
+      allow delete: if isValidId(missionId) && isSignedIn() && existing().userId == request.auth.uid;
+    }
+  }
+}
